@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-from datetime import datetime
+import datetime as dt
 import colorama
 import os.path
+from pathlib import Path
 
-TASKS_PATH = "./tasks.txt"
+
+TASKS_PATH = str(Path.home()) + "/" + ".tasker_tasks.txt"
 
 PRIORITY = {'1': colorama.Fore.RESET,
 			'2': colorama.Fore.LIGHTYELLOW_EX,
@@ -24,19 +26,23 @@ def add_arguments(parser):
 						help="add new task to list")
 	parser.add_argument("-d", nargs="+", dest="delete",
 						help="delete tasks from list")
-	parser.add_argument("-l", "--list",action="store_true",
+	parser.add_argument("-l", "--list", action="store_true",
 						dest="print", default=False, 
 						help="print tasks list")
+	parser.add_argument("-t", "--time", action="store_true",
+						dest="time", default=False,
+						help="add deadline for task")
 	parser.add_argument("-q", "--quiet",
 	                    action="store_false", dest="verbose", default=True,
 	                    help="don't print status messages to stdout")
+	# TODO: edit task option
 
 
 def check_file_exist():
 	# create file if not found
 	if not os.path.isfile(TASKS_PATH):
-		with open(TASKS_PATH, 'w'):
-			pass
+		file = open(TASKS_PATH, 'w+')
+		file.close()
 
 
 def read_tasks():
@@ -55,15 +61,19 @@ def print_tasks():
 	tasks = read_tasks()
 	colorama.init()
 	for i, task in enumerate(tasks):
-		p, d, t = task.split('|')
+		prior, date, task, deadline = task.split('|')
+
+		if deadline:
+			deadline = colorama.Fore.MAGENTA + " (due: " + deadline + ")"
 		
 		print(PRIORITY['1'] + str(i+1) + "."
 			+ colorama.Fore.LIGHTMAGENTA_EX
-			+ " (" + d + ") "
-			+ PRIORITY[p] + t)
+			+ " (" + date + ") "
+			+ PRIORITY[prior] + task
+			+ deadline)
 
 
-def add_new_task(verbose):
+def add_new_task(verbose, time):
 	if verbose:
 		print("Write your task:")
 	task = input()
@@ -80,10 +90,27 @@ def add_new_task(verbose):
 	if priority.strip() not in ['1', '2', '3']:
 		priority = '1'
 
-	date = datetime.now().strftime("%d.%m.%y")
+	date = dt.datetime.now()
+
+	if time:
+		if verbose:
+			print("Write days to deadline")
+		try:
+			days = abs(int(input()))
+		except ValueError:
+			die("invalid integer input")
+
+		days = (date + dt.timedelta(days=days)).strftime("%d.%m.%y")
+	else:
+		days = ' '
+
+	date = date.strftime("%d.%m.%y")
 
 	with open(TASKS_PATH, 'a') as handler:
-		handler.write(priority + '|' + date + '|' + task + '\n')
+		handler.write(priority + '|'
+						+ date + '|'
+						+ task + '|'
+						+ days + '\n')
 
 	if verbose:
 		print("Task added successfully")
@@ -126,7 +153,7 @@ def main():
 		print_tasks()
 		exit(0)
 	elif args.add:
-		add_new_task(args.verbose)
+		add_new_task(args.verbose, args.time)
 	elif args.delete:
 		delete_task(args)
 
