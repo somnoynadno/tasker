@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+from datetime import datetime
+import colorama
 import os.path
 
 TASKS_PATH = "./tasks.txt"
+
+PRIORITY = {'1': colorama.Fore.RESET,
+			'2': colorama.Fore.LIGHTYELLOW_EX,
+			'3': colorama.Fore.LIGHTRED_EX}
+
 
 def die(error):
 	print()
@@ -46,9 +53,14 @@ def read_tasks():
 
 def print_tasks():
 	tasks = read_tasks()
+	colorama.init()
 	for i, task in enumerate(tasks):
-		print(str(i+1) + ". " + task)
-		# TODO: add pretty print
+		p, d, t = task.split('|')
+		
+		print(PRIORITY['1'] + str(i+1) + "."
+			+ colorama.Fore.LIGHTMAGENTA_EX
+			+ " (" + d + ") "
+			+ PRIORITY[p] + t)
 
 
 def add_new_task(verbose):
@@ -56,17 +68,25 @@ def add_new_task(verbose):
 		print("Write your task:")
 	task = input()
 
-	# TODO: this
-	# if verbose:
-	# 	print("Set your priority:")
-	# priority = input()
+	if task == '':
+		die("empty task")
+	if '|' in task:
+		die("char '|' restricted")
+
+	if verbose:
+		print("Set your priority:")
+	priority = input()
+
+	if priority.strip() not in ['1', '2', '3']:
+		priority = '1'
+
+	date = datetime.now().strftime("%d.%m.%y")
 
 	with open(TASKS_PATH, 'a') as handler:
-		handler.write(task + '\n')
+		handler.write(priority + '|' + date + '|' + task + '\n')
 
 	if verbose:
 		print("Task added successfully")
-	# TODO: add datetime
 
 
 def delete_task(args):
