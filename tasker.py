@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-import datetime as dt
-import colorama
-import os.path
 from pathlib import Path
+import colorama
+import datetime as dt
+import os.path
 
 
 TASKS_PATH = str(Path.home()) + "/" + ".tasker_tasks.txt"
@@ -34,7 +34,7 @@ def add_arguments(parser):
 						help="add deadline for task")
 	parser.add_argument("-q", "--quiet",
 	                    action="store_false", dest="verbose", default=True,
-	                    help="don't print status messages to stdout")
+	                    help="don't print messages to stdout")
 	# TODO: edit task option
 
 
@@ -63,7 +63,7 @@ def print_tasks():
 	for i, task in enumerate(tasks):
 		prior, date, task, deadline = task.split('|')
 
-		if deadline:
+		if deadline and deadline != " ":
 			deadline = colorama.Fore.MAGENTA + " (due: " + deadline + ")"
 		
 		print(PRIORITY['1'] + str(i+1) + "."
