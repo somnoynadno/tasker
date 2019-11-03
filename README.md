@@ -14,15 +14,15 @@ Simple linux terminal task manager
 
 3. Install requirements.txt
 
-```pip3 install requirements.txt```
+```pip3 install -r requirements.txt```
 
 4. Make script executable
 
-```chmod +x tasker```
+```chmod +x tasker.py```
 
 5. Add alias to script
 
-```alias tasker='~/tasker/./tasker.py'```
+```alias tasker='<PATH_TO_YOUR_REPO>/./tasker.py'```
 
 ## Usage
 
